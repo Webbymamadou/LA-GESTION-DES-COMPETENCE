@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Compétences">
+    <link rel="manifest" href="manifest.json ;">
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTEyMCIgaGVpZ2h0PSIxMTIwIiB2aWV3Qm94PSIwIDAgMTEyMCAxMTIwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjx0ZXh0IHg9IjU2IiB5PSI1NiIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjQ4IiBmaWxsPSIjZWZlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7wn46vPC90ZXh0Pjwvc3ZnPg==">
+    <title>Gestionnaire de Compétences</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding-bottom: 80px;
+        overflow-x: hidden;
+    }
+
+    .install-prompt {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        display: none;
+        z-index: 1000;
+        animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+        from { transform: translateY(100px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    .install-prompt.show {
+        display: block;
+    }
+
+    .install-prompt h3 {
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    .install-prompt p {
+        color: #666;
+        margin-bottom: 15px;
+        font-size: 14px;
+    }
+
+    .install-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .container {
+        max-width: 100%;
+        padding: 0 15px;
+    }
+
+    header {
+        text-align: center;
+        color: white;
+        padding: 30px 15px 20px;
+        position: sticky;
+        top: 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        z-index: 100;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+        font-size: 1.8em;
+        margin-bottom: 5px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .subtitle {
+        font-size: 0.9em;
+        opacity: 0.9;
+    }
+
+    .main-content {
+        background: white;
+        border-radius: 20px 20px 0 0;
+        padding: 20px 15px;
+        margin-top: 20px;
+        min-height: calc(100vh - 200px);
+    }
+
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 25px;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 10px;
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 1.8em;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        font-size: 0.75em;
+        opacity: 0.9;
+    }
+
+    .section-title {
+        font-size: 1.3em;
+        color: #333;
+        margin: 25px 0 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #333;
+        font-size: 0.95em;
+    }
+
+    input, textarea, select {
+        width: 100%;
+        padding: 14px;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+        font-family: inherit;
+    }
+
+    input:focus, textarea:focus, select:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+
+    textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .level-slider-container {
+        position: relative;
+    }
+
+    .level-display {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #667eea;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.9em;
+    }
+
+    input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 8px;
+        border-radius: 5px;
+        background: #e0e0e0;
+        outline: none;
+        padding: 0;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #667eea;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #667eea;
+        cursor: pointer;
+        border: none;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .btn {
+        width: 100%;
+        padding: 16px;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        margin-bottom: 10px;
+    }
+
+    .btn-primary:active {
+        transform: scale(0.98);
+    }
+
+    .btn-secondary {
+        background: #f0f0f0;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .btn-small {
+        width: auto;
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+
+    .action-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .filter-section {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+    }
+
+    .filter-scroll {
+        display: flex;
+        gap: 10px;
+        padding: 5px 0;
+    }
+
+    .filter-btn {
+        padding: 10px 20px;
+        border: 2px solid #667eea;
+        background: white;
+        color: #667eea;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s;
+        white-space: nowrap;
+        font-weight: 600;
+        font-size: 0.9em;
+    }
+
+    .filter-btn.active {
+        background: #667eea;
+        color: white;
+    }
+
+    .skills-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .skill-card {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .skill-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 12px;
+    }
+
+    .skill-title {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #333;
+        word-break: break-word;
+    }
+
+    .skill-category {
+        display: inline-block;
+        padding: 5px 12px;
+        background: rgba(102, 126, 234, 0.15);
+        border-radius: 20px;
+        font-size: 0.8em;
+        color: #667eea;
+        font-weight: 600;
+        margin-top: 8px;
+        white-space: nowrap;
+    }
+
+    .skill-level {
+        margin: 15px 0;
+    }
+
+    .level-label {
+        font-size: 0.85em;
+        color: #666;
+        margin-bottom: 8px;
+    }
+
+    .level-bar {
+        width: 100%;
+        height: 24px;
+        background: rgba(255,255,255,0.6);
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .level-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        transition: width 0.5s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.8em;
+        font-weight: bold;
+    }
+
+    .skill-description {
+        color: #555;
+        line-height: 1.6;
+        margin: 12px 0;
+        font-size: 0.95em;
+    }
+
+    .skill-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 15px;
+    }
+
+    .btn-delete {
+        background: #ff4757;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn-delete:active {
+        background: #ee5a6f;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+    }
+
+    .empty-icon {
+        font-size: 4em;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+
+    .fab {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        font-size: 28px;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        cursor: pointer;
+        z-index: 999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .fab:active {
+        transform: scale(0.95);
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+        animation: fadeIn 0.2s;
+    }
+
+    .modal.show {
+        display: flex;
+        align-items: flex-end;
+    }
+
+    .modal-content {
+        background: white;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        border-radius: 20px 20px 0 0;
+        padding: 25px 20px;
+        animation: slideUp 0.3s ease;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .modal-title {
+        font-size: 1.5em;
+        color: #333;
+    }
+
+    .close-btn {
+        font-size: 1.5em;
+        color: #999;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+    }
+
+    @media (min-width: 768px) {
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+    }
+</style>
+
+
+</head>
+<body>
+    <!-- Prompt d'installation -->
+    <div class="install-prompt" id="installPrompt">
+        <h3>📱 Installer l'application</h3>
+        <p>Installez cette app sur votre téléphone pour un accès rapide et une utilisation hors ligne !</p>
+        <div class="install-buttons">
+            <button class="btn btn-primary" onclick="installApp()">Installer</button>
+            <button class="btn btn-secondary" onclick="dismissInstall()">Plus tard</button>
+        </div>
+    </div>
+
+
+<header>
+    <h1>🎯 Mes Compétences</h1>
+    <p class="subtitle">Suivez votre progression</p>
+</header>
+
+<div class="container">
+    <div class="main-content">
+        <!-- Statistiques -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalSkills">0</div>
+                <div class="stat-label">Total</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="avgLevel">0%</div>
+                <div class="stat-label">Moyenne</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalCategories">0</div>
+                <div class="stat-label">Types</div>
+            </div>
+        </div>
+
+        <!-- Actions rapides -->
+        <div class="action-buttons">
+            <button class="btn btn-secondary btn-small" onclick="exportData()">
+                💾 Exporter
+            </button>
+            <button class="btn btn-secondary btn-small" onclick="importData()">
+                📥 Importer
+            </button>
+        </div>
+
+        <!-- Filtres -->
+        <div class="filter-section">
+            <div class="filter-scroll">
+                <button class="filter-btn active" onclick="filterSkills('all')">Toutes</button>
+                <button class="filter-btn" onclick="filterSkills('Technique')">Technique</button>
+                <button class="filter-btn" onclick="filterSkills('Gestion')">Gestion</button>
+                <button class="filter-btn" onclick="filterSkills('Communication')">Communication</button>
+                <button class="filter-btn" onclick="filterSkills('Design')">Design</button>
+                <button class="filter-btn" onclick="filterSkills('Autre')">Autre</button>
+            </div>
+        </div>
+
+        <!-- Liste des compétences -->
+        <div id="skillsList" class="skills-list"></div>
+    </div>
+</div>
+
+<!-- Bouton flottant -->
+<button class="fab" onclick="openAddModal()">+</button>
+
+<!-- Modal d'ajout -->
+<div id="addModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">➕ Nouvelle compétence</h2>
+            <button class="close-btn" onclick="closeAddModal()">×</button>
+        </div>
+
+        <form id="skillForm">
+            <div class="form-group">
+                <label for="skillName">Nom de la compétence *</label>
+                <input type="text" id="skillName" placeholder="Ex: JavaScript, Leadership..." required>
+            </div>
+
+            <div class="form-group">
+                <label for="skillCategory">Catégorie *</label>
+                <select id="skillCategory" required>
+                    <option value="">Sélectionner...</option>
+                    <option value="Technique">Technique</option>
+                    <option value="Gestion">Gestion</option>
+                    <option value="Communication">Communication</option>
+                    <option value="Design">Design</option>
+                    <option value="Autre">Autre</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="skillLevel">Niveau de maîtrise *</label>
+                <div class="level-slider-container">
+                    <input type="range" id="skillLevel" min="0" max="100" value="50">
+                    <div class="level-display" id="levelDisplay">50%</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="skillDescription">Description (optionnel)</label>
+                <textarea id="skillDescription" placeholder="Vos expériences, projets..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">✅ Ajouter</button>
+        </form>
+    </div>
+</div>
+
+<input type="file" id="fileInput" accept=".json" style="display: none;">
+
+<script>
+    let skills = [];
+    let currentFilter = 'all';
+    let deferredPrompt;
+
+    // Service Worker pour PWA
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('data:application/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJywgZnVuY3Rpb24oZSkge30pOw==')
+            .catch(err => console.log('SW registration failed'));
+    }
+
+    // Gestion de l'installation PWA
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        setTimeout(() => {
+            document.getElementById('installPrompt').classList.add('show');
+        }, 3000);
+    });
+
+    function installApp() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                deferredPrompt = null;
+                dismissInstall();
+            });
+        }
+    }
+
+    function dismissInstall() {
+        document.getElementById('installPrompt').classList.remove('show');
+    }
+
+    // Charger les données
+    window.addEventListener('load', () => {
+        loadSkills();
+        renderSkills();
+        updateStats();
+    });
+
+    // Slider
+    document.getElementById('skillLevel').addEventListener('input', (e) => {
+        document.getElementById('levelDisplay').textContent = e.target.value + '%';
+    });
+
+    // Formulaire
+    document.getElementById('skillForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const skill = {
+            id: Date.now(),
+            name: document.getElementById('skillName').value,
+            category: document.getElementById('skillCategory').value,
+            level: parseInt(document.getElementById('skillLevel').value),
+            description: document.getElementById('skillDescription').value,
+            createdAt: new Date().toISOString()
+        };
+
+        skills.unshift(skill);
+        saveSkills();
+        renderSkills();
+        updateStats();
+        closeAddModal();
+        
+        e.target.reset();
+        document.getElementById('levelDisplay').textContent = '50%';
+    });
+
+    function loadSkills() {
+        const saved = localStorage.getItem('skillsApp');
+        if (saved) {
+            skills = JSON.parse(saved);
+        }
+    }
+
+    function saveSkills() {
+        localStorage.setItem('skillsApp', JSON.stringify(skills));
+    }
+
+    function renderSkills() {
+        const container = document.getElementById('skillsList');
+        const filteredSkills = currentFilter === 'all' 
+            ? skills 
+            : skills.filter(s => s.category === currentFilter);
+
+        if (filteredSkills.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">🎯</div>
+                    <h3>Aucune compétence</h3>
+                    <p>Appuyez sur + pour ajouter</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = filteredSkills.map(skill => `
+            <div class="skill-card">
+                <div class="skill-header">
+                    <div style="flex: 1;">
+                        <div class="skill-title">${skill.name}</div>
+                        <span class="skill-category">${skill.category}</span>
+                    </div>
+                </div>
+                
+                <div class="skill-level">
+                    <div class="level-label">Niveau de maîtrise</div>
+                    <div class="level-bar">
+                        <div class="level-fill" style="width: ${skill.level}%">
+                            ${skill.level}%
+                        </div>
+                    </div>
+                </div>
+
+                ${skill.description ? `
+                    <div class="skill-description">${skill.description}</div>
+                ` : ''}
+
+                <div class="skill-actions">
+                    <button class="btn-delete" onclick="deleteSkill(${skill.id})">
+                        🗑 Supprimer
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function deleteSkill(id) {
+        if (confirm('Supprimer cette compétence ?')) {
+            skills = skills.filter(s => s.id !== id);
+            saveSkills();
+            renderSkills();
+            updateStats();
+        }
+    }
+
+    function updateStats() {
+        document.getElementById('totalSkills').textContent = skills.length;
+        
+        const avgLevel = skills.length > 0 
+            ? Math.round(skills.reduce((sum, s) => sum + s.level, 0) / skills.length)
+            : 0;
+        document.getElementById('avgLevel').textContent = avgLevel + '%';
+
+        const categories = new Set(skills.map(s => s.category));
+        document.getElementById('totalCategories').textContent = categories.size;
+    }
+
+    function filterSkills(category) {
+        currentFilter = category;
+        
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        
+        renderSkills();
+    }
+
+    function openAddModal() {
+        document.getElementById('addModal').classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeAddModal() {
+        document.getElementById('addModal').classList.remove('show');
+        document.body.style.overflow = '';
+    }
+
+    function exportData() {
+        const dataStr = JSON.stringify(skills, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `competences-${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function importData() {
+        const input = document.getElementById('fileInput');
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const imported = JSON.parse(event.target.result);
+                        if (Array.isArray(imported)) {
+                            if (confirm('Remplacer vos données actuelles ?')) {
+                                skills = imported;
+                                saveSkills();
+                                renderSkills();
+                                updateStats();
+                                alert('✅ Données importées !');
+                            }
+                        }
+                    } catch (error) {
+                        alert('❌ Erreur lors de l\'importation');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        };
+        input.click();
+    }
+
+    // Fermer modal en cliquant à l'extérieur
+    document.getElementById('addModal').addEventListener('click', (e) => {
+        if (e.target.id === 'addModal') {
+            closeAddModal();
+        }
+    });
+</script>
+</body>
+</html>
